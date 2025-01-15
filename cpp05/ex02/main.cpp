@@ -7,42 +7,40 @@
 
 int main() {
     try {
-        // Create bureaucrats with different grades
-        Bureaucrat boss("Boss", 1);                // Highest grade
-        Bureaucrat manager("Manager", 40);         // Mid-level grade
-        Bureaucrat intern("Intern", 150);          // Lowest grade
+        Bureaucrat boss("Boss", 1);
+        Bureaucrat manager("Manager", 40);
+        Bureaucrat intern("Intern", 150);
 
         std::cout << "\n=== Testing Shrubbery Creation Form ===" << std::endl;
         ShrubberyCreationForm shrubbery("home");
         std::cout << shrubbery << std::endl;
         
-        intern.signForm(shrubbery);      // Should fail (grade too low)
-        boss.signForm(shrubbery);        // Should succeed
-        intern.executeForm(shrubbery);   // Should fail (grade too low)
-        boss.executeForm(shrubbery);     // Should succeed and create file
+        intern.signForm(shrubbery);
+        boss.signForm(shrubbery);
+        intern.executeForm(shrubbery);
+        boss.executeForm(shrubbery);
 
         std::cout << "\n=== Testing Robotomy Request Form ===" << std::endl;
         RobotomyRequestForm robotomy("Bender");
         std::cout << robotomy << std::endl;
         
-        manager.signForm(robotomy);      // Should succeed
-        intern.executeForm(robotomy);    // Should fail (grade too low)
-        manager.executeForm(robotomy);   // Should succeed
-        boss.executeForm(robotomy);      // Should succeed
+        manager.signForm(robotomy);
+        intern.executeForm(robotomy);
+        manager.executeForm(robotomy);
+        boss.executeForm(robotomy);
 
         std::cout << "\n=== Testing Presidential Pardon Form ===" << std::endl;
         PresidentialPardonForm pardon("Criminal");
         std::cout << pardon << std::endl;
         
-        manager.signForm(pardon);        // Should fail (grade too low)
-        boss.signForm(pardon);           // Should succeed
-        manager.executeForm(pardon);     // Should fail (grade too low)
-        boss.executeForm(pardon);        // Should succeed
+        manager.signForm(pardon);
+        boss.signForm(pardon);
+        manager.executeForm(pardon);
+        boss.executeForm(pardon);
 
         std::cout << "\n=== Testing Exception Cases ===" << std::endl;
-        // Try to execute unsigned form
         ShrubberyCreationForm unsignedForm("garden");
-        boss.executeForm(unsignedForm);  // Should fail (not signed)
+        boss.executeForm(unsignedForm);
 
     } catch (std::exception& e) {
         std::cerr << "Exception caught: " << e.what() << std::endl;
