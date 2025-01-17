@@ -2,14 +2,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <typeinfo>
 
 Base::~Base() {}
 
 Base* generate(void) {
     static bool seeded = false;
     if (!seeded) {
-        std::srand(std::time(NULL));
+        std::srand(static_cast<unsigned>(std::time(0)));
         seeded = true;
     }
     
@@ -21,39 +20,39 @@ Base* generate(void) {
         case 2:
             return new C();
         default:
-            return NULL;
+            return 0;
     }
 }
 
 void identify(Base* p) {
-    if (dynamic_cast<A*>(p))
-        std::cout << "A" << std::endl;
-    else if (dynamic_cast<B*>(p))
-        std::cout << "B" << std::endl;
-    else if (dynamic_cast<C*>(p))
-        std::cout << "C" << std::endl;
-    else
+    if (p == 0) {
         std::cout << "Unknown type" << std::endl;
+        return;
+    }
+    
+    if (dynamic_cast<A*>(p)) {
+        std::cout << "A" << std::endl;
+    } else if (dynamic_cast<B*>(p)) {
+        std::cout << "B" << std::endl;
+    } else if (dynamic_cast<C*>(p)) {
+        std::cout << "C" << std::endl;
+    } else {
+        std::cout << "Unknown type" << std::endl;
+    }
 }
 
 void identify(Base& p) {
-    try {
-        (void)dynamic_cast<A&>(p);
+    struct Tester : Base {
+        virtual ~Tester() {}
+    };
+
+    if (dynamic_cast<A*>(&p)) {
         std::cout << "A" << std::endl;
-        return;
-    } catch (std::bad_cast&) {}
-
-    try {
-        (void)dynamic_cast<B&>(p);
+    } else if (dynamic_cast<B*>(&p)) {
         std::cout << "B" << std::endl;
-        return;
-    } catch (std::bad_cast&) {}
-
-    try {
-        (void)dynamic_cast<C&>(p);
+    } else if (dynamic_cast<C*>(&p)) {
         std::cout << "C" << std::endl;
-        return;
-    } catch (std::bad_cast&) {}
-
-    std::cout << "Unknown type" << std::endl;
+    } else {
+        std::cout << "Unknown type" << std::endl;
+    }
 }
