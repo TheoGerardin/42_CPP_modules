@@ -1,6 +1,6 @@
-NAME = 
+NAME = Span
 
-SRC = 
+SRC = main.cpp Span.cpp
 OBJ = $(SRC:.cpp=.o)
 
 CC = c++
