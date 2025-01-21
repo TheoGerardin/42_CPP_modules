@@ -1,6 +1,6 @@
-NAME = 
+NAME = Mutantstack
 
-SRC = 
+SRC = main.cpp
 OBJ = $(SRC:.cpp=.o)
 
 CC = c++
