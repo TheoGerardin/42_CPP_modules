@@ -2,40 +2,34 @@
 #define SPAN_HPP
 
 #include <vector>
-#include <exception>
+#include <algorithm>
+#include <stdexcept>
+#include <iostream>
+#include <limits>
 
-class Span {
+class Span
+{
 private:
-    unsigned int N;
-    std::vector<int> numbers;
+	unsigned int _maxSize;
+	std::vector<int> _numbers;
 
 public:
-    Span(unsigned int N);
-    Span(const Span& other);
-    ~Span();
-    Span& operator=(const Span& other);
+	Span(unsigned int n) : _maxSize(n) {}
+	~Span() {}
 
-    void addNumber(int number);
-    unsigned int shortestSpan() const;
-    unsigned int longestSpan() const;
-    
-    template<typename Iterator>
-    void addRange(Iterator begin, Iterator end) {
-        if (numbers.size() + std::distance(begin, end) > N) {
-            throw std::runtime_error("Cannot add range: would exceed maximum capacity");
-        }
-        numbers.insert(numbers.end(), begin, end);
-    }
+	void addNumber(int number);
 
-    class FullSpanException : public std::exception {
-        public:
-            virtual const char* what() const throw();
-    };
+	template<typename Iterator>
+	void addNumber(Iterator begin, Iterator end)
+	{
+		if (std::distance(begin, end) + _numbers.size() > _maxSize)
+			throw std::overflow_error("Range exceeds the capacity of Span.");
+		_numbers.insert(_numbers.end(), begin, end);
+	}
 
-    class NoSpanToFindException : public std::exception {
-        public:
-            virtual const char* what() const throw();
-    };
+	int shortestSpan() const;
+
+	int longestSpan() const;
 };
 
 #endif
