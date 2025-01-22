@@ -31,3 +31,15 @@ int Span::longestSpan() const {
 
     return maxElem - minElem;
 }
+
+void Span::addingRange(int start, int end)
+{
+    if (end < start) {
+        throw std::invalid_argument("End value must be greater than or equal to start.");
+    }
+
+    for (int i = start; i <= end; ++i)
+    {
+        addNumber(i);
+    }
+}

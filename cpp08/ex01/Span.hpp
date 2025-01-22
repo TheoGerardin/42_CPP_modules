@@ -30,6 +30,8 @@ public:
 	int shortestSpan() const;
 
 	int longestSpan() const;
+
+	void addingRange(int start, int end);
 };
 
 #endif
