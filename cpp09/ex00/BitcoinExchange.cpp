@@ -56,8 +56,7 @@ void BitcoinExchange::loadDatabase(const std::string& filename) {
 
     std::string line, date;
     float rate;
-    std::getline(file, line); // Skip header
-
+    std::getline(file, line);
     while (std::getline(file, line)) {
         std::istringstream ss(line);
         std::getline(ss, date, ',');
@@ -75,7 +74,7 @@ void BitcoinExchange::processInputFile(const std::string& filename) {
 
     std::string line, date, rawValue;
     float value;
-    std::getline(file, line); // Skip header
+    std::getline(file, line);
 
     while (std::getline(file, line)) {
         std::istringstream ss(line);

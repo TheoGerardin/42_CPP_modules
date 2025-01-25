@@ -96,14 +96,12 @@ void PmergeMe::sort() {
 }
 
 void PmergeMe::displayResults() {
-    // Before sorting
     std::cout << "Before: ";
     for (size_t i = 0; i < _vec.size(); ++i) {
         std::cout << _vec[i] << " ";
     }
     std::cout << std::endl;
 
-    // After sorting
     std::cout << "After: ";
     for (size_t i = 0; i < _vec.size(); ++i) {
         std::cout << _vec[i] << " ";
