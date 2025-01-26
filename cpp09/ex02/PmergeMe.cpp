@@ -1,110 +1,152 @@
 #include "PmergeMe.hpp"
 
-PmergeMe::PmergeMe() {}
+PmergeMe::PmergeMe(){};
 
-void PmergeMe::validateInput(int argc, char** argv) {
-    for (int i = 1; i < argc; ++i) {
-        char* end;
-        long value = std::strtol(argv[i], &end, 10);
-        
-        if (*end != '\0' || value < 0) 
-            throw std::runtime_error("Invalid input");
-        
-        _vec.push_back(value);
-        _lst.push_back(value);
-    }
+PmergeMe::PmergeMe(const PmergeMe &src){
+	*this = src;
+};
+
+PmergeMe::~PmergeMe(){};
+
+PmergeMe & PmergeMe::operator=(const PmergeMe &other){
+	if (this != &other){
+		this->args = other.args;
+		this->vector_sorted = other.vector_sorted;
+		this->vector_duration = other.vector_duration;
+		this->list_sorted = other.list_sorted;
+		this->list_duration = other.list_duration;
+	}
+	return *this;
+};
+
+int is_sorted(const std::vector<int> &v){
+	for(size_t i = 0; i < v.size() - 1; i++){
+		if (v[i] > v[i + 1])
+			return 0;
+	}
+	return 1;
 }
 
-template <typename Container>
-void PmergeMe::insertionSort(Container& container, size_t start, size_t end) {
-    for (size_t i = start + 1; i <= end; ++i) {
-        auto key = std::next(container.begin(), i);
-        auto j = std::prev(key);
-        
-        while (j != std::prev(container.begin(), start) && *j > *key) {
-            std::iter_swap(j, key);
-            key = j;
-            j = std::prev(j);
-        }
-    }
+int digital_string(const char *str){
+	while(*str){
+		if (!std::isdigit(*str))
+			return 0;
+		str++;
+	}
+	return 1;
 }
 
-template <typename Container>
-void PmergeMe::mergeSort(Container& container, size_t start, size_t mid, size_t end) {
-    Container left(std::next(container.begin(), start), 
-                   std::next(container.begin(), mid + 1));
-    Container right(std::next(container.begin(), mid + 1), 
-                    std::next(container.begin(), end + 1));
-    
-    auto left_it = left.begin();
-    auto right_it = right.begin();
-    auto container_it = std::next(container.begin(), start);
-    
-    while (left_it != left.end() && right_it != right.end()) {
-        if (*left_it <= *right_it) {
-            *container_it = *left_it;
-            ++left_it;
-        } else {
-            *container_it = *right_it;
-            ++right_it;
-        }
-        ++container_it;
-    }
-    
-    while (left_it != left.end()) {
-        *container_it = *left_it;
-        ++left_it;
-        ++container_it;
-    }
-    
-    while (right_it != right.end()) {
-        *container_it = *right_it;
-        ++right_it;
-        ++container_it;
-    }
+int PmergeMe::parse_args(char **av){
+	int i = 0;
+	while (av[i]){
+		if (!digital_string(av[i])){
+			std::cout << "Error: " << av[i] << " isn't a number" << std::endl;
+			return 1;
+		}
+		long num = std::atol(av[i]);
+		if (num < 0){
+			std::cout << "Error: " << av[i] << " isn't a positive number" << std::endl;
+			return 1;
+		}
+		else if (num > __INT_MAX__){
+			std::cout << "Error: " << av[i] << " must be smaller than INT MAX " << std::endl;
+			return 1;
+		}
+		this->args.push_back(static_cast<int>(num));
+		i++;
+	}
+	return 0;
 }
 
-template <typename Container>
-void PmergeMe::fordJohnsonSort(Container& container) {
-    size_t n = container.size();
-    
-    if (n <= 1) return;
-    
-    for (size_t block_size = 1; block_size < n; block_size *= 2) {
-        for (size_t start = 0; start < n; start += 2 * block_size) {
-            size_t mid = std::min(start + block_size - 1, n - 1);
-            size_t end = std::min(start + 2 * block_size - 1, n - 1);
-            
-            if (mid < end) {
-                mergeSort(container, start, mid, end);
-            }
-        }
-        
-        insertionSort(container, 0, n - 1);
-    }
+int PmergeMe::merge_vector(){
+	std::clock_t start_timer = std::clock();
+
+	if (is_sorted(this->args)){
+		std::cout << "Already sorted" << std::endl;
+		this->vector_sorted = this->args;
+		return 1;
+	}
+	if (this->args.size() == 1){
+		this->vector_sorted.push_back(this->args[0]);
+		std::cout << "Only one number" << std::endl;
+		return 1;
+	}
+
+	std::vector<std::pair<int,int> > pairs;
+	for (size_t i = 0; i < this->args.size(); i += 2){
+		int first = this->args[i];
+		int second = (i + 1 < this->args.size() ? this->args[i + 1] : -1);
+		if (second != -1 && first > second)
+			std::swap(first, second);
+		pairs.push_back(std::make_pair(first, second));
+	}
+	std::vector<int> mins;
+	for (size_t i = 0; i < pairs.size(); ++i)
+		mins.push_back(pairs[i].first);
+	std::sort(mins.begin(), mins.end());
+
+
+	std::vector<int> sorted = mins;
+	for (size_t i = 0; i < pairs.size(); ++i){
+		if (pairs[i].second != -1){
+			std::vector<int>::iterator pos = std::lower_bound(sorted.begin(), sorted.end(), pairs[i].second);
+			sorted.insert(pos, pairs[i].second);
+		}
+	}
+	this->vector_sorted = sorted;
+	this->vector_duration = static_cast<double>(std::clock() - start_timer) / CLOCKS_PER_SEC * 1000;
+	return 0;
 }
 
-void PmergeMe::processInput(int argc, char** argv) {
-    _vec.clear();
-    _lst.clear();
-    validateInput(argc, argv);
+int PmergeMe::merge_list(){
+	std::clock_t start_time = std::clock();
+
+	if (is_sorted(this->args)){
+		std::cout << "Already is sorted" << std::endl;
+		this->list_sorted = std::list<int>(this->args.begin(), this->args.end());
+		return 1;
+	}
+	if (this->args.size() == 1){
+		this->list_sorted.push_back(this->args[0]);
+		std::cout << "Only one number" << std::endl;
+		return 1;
+	}
+	std::vector<std::pair<int,int> > pairs;
+	for (size_t i = 0; i < this->args.size(); i += 2){
+		int first = this->args[i];
+		int second = (i + 1 < this->args.size() ? this->args[i + 1] : -1);
+		if (second != -1 && first > second)
+			std::swap(first, second);
+		pairs.push_back(std::make_pair(first, second));
+	}
+	std::vector<int> mins;
+	for(size_t i = 0; i < pairs.size(); ++i)
+		mins.push_back(pairs[i].first);
+	std::sort(mins.begin(), mins.end());
+
+	std::list<int> sorted;
+	for (size_t i = 0; i < pairs.size(); ++i){
+		std::list<int>::iterator pos = std::lower_bound(sorted.begin(), sorted.end(), pairs[i].second);
+		sorted.insert(pos, pairs[i].first);
+	}
+
+	this->list_sorted = sorted;
+	this->list_duration = static_cast<double>(std::clock() - start_time) / CLOCKS_PER_SEC * 1000;
+	return 0;
 }
 
-void PmergeMe::sort() {
-    fordJohnsonSort(_vec);
-    fordJohnsonSort(_lst);
-}
 
-void PmergeMe::displayResults() {
-    std::cout << "Before: ";
-    for (size_t i = 0; i < _vec.size(); ++i) {
-        std::cout << _vec[i] << " ";
-    }
-    std::cout << std::endl;
-
-    std::cout << "After: ";
-    for (size_t i = 0; i < _vec.size(); ++i) {
-        std::cout << _vec[i] << " ";
-    }
-    std::cout << std::endl;
+void PmergeMe::display(){
+	std::cout << "Before: ";
+	for (std::vector<int>::const_iterator it = args.begin(); it != args.end(); ++it){
+		std::cout << *it << " " ;
+	}
+	std::cout << std::endl;
+	std::cout << "After: ";
+	for (std::vector<int>::const_iterator it = vector_sorted.begin(); it != vector_sorted.end(); ++it){
+		std::cout << *it << " ";
+	}
+	std::cout << std::endl;
+	std::cout << "Time to process a range of " << args.size() << " elements with std::vector : " << vector_duration << std::endl;
+	std::cout << "Time to process a range of " << args.size() << " elements with std::list : " << list_duration << std::endl;
 }

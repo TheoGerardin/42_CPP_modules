@@ -1,35 +1,32 @@
-#ifndef PMERGE_ME_HPP
-#define PMERGE_ME_HPP
+#ifndef PMERGEME_HPP
+#define PMERGEME_HPP
 
+#include <iostream>
 #include <vector>
 #include <list>
-#include <iostream>
-#include <ctime>
-#include <iomanip>
 #include <algorithm>
-#include <stdexcept>
+#include <cstdlib>
+#include <cctype>
+#include <ctime>
 
-class PmergeMe {
+class PmergeMe{
 private:
-    std::vector<int> _vec;
-    std::list<int> _lst;
+	std::vector<int> args;
+	std::vector<int> vector_sorted;
+	double vector_duration;
 
-    void validateInput(int argc, char** argv);
-    
-    template <typename Container>
-    void fordJohnsonSort(Container& container);
-    
-    template <typename Container>
-    void insertionSort(Container& container, size_t start, size_t end);
-    
-    template <typename Container>
-    void mergeSort(Container& container, size_t start, size_t mid, size_t end);
-
+	std::list<int> list_sorted;
+	double list_duration;
 public:
-    PmergeMe();
-    void processInput(int argc, char** argv);
-    void sort();
-    void displayResults();
+	PmergeMe();
+	PmergeMe(const PmergeMe &src);
+	~PmergeMe();
+	PmergeMe &operator=(const PmergeMe &other);
+
+	int parse_args(char **);
+	int merge_vector();
+	int merge_list();
+	void display();
 };
 
 #endif
