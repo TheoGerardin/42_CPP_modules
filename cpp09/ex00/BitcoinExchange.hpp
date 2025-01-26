@@ -20,7 +20,8 @@ public:
     ~BitcoinExchange();
 
 	BitcoinExchange &operator=(BitcoinExchange const &other);
-
+    bool is_valid_date(const std::string& date);
+	bool is_valid_amount(const std::string& value);
     void compare(std::string filename);
 };
 

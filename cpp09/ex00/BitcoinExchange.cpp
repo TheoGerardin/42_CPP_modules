@@ -48,43 +48,68 @@ float BitcoinExchange::get_value_closest(std::string date){
 	return closest_value;
 }
 
-void BitcoinExchange::compare(std::string filename){
-	std::ifstream file(filename.c_str());
+bool BitcoinExchange::is_valid_date(const std::string& date) {
+    for (int i = 0; i < 9; ++i) {
+        if (!std::isdigit(date[i]) && date[i] != '-') {
+            return false;
+        }
+    }
+	if (date[10] != ' ' && date[11] != '|' && date[12] != ' ')
+		return false;
 
-	if (file){
-		std::string line;
-		getline(file, line);
-		if (line != "date | value"){
-			std::cout << "Error: bad input => " << line << std::endl;
-			return;
-		}
-		while(getline(file, line)){
-			size_t sep = line.find("|");
-			if (sep == std::string::npos){
-				std::cout << "Error: bad input => " << line << std::endl;
-			}
-			else{
-				std::string date = line.substr(0, sep);
-				std::string value = line.substr(sep + 1);
-				if (date.empty() || value.empty()){
-					std::cout << "Error: bad input => " << line << std::endl;
-				}
-				else{
-					float max = atof(value.c_str());
-					if (max > 1000)
-						std::cout << "Error: too large a number." << std::endl;
-					else if(max < 0)
-						std::cout << "Error: not a positive number." << std::endl;
-					else if(get_value_closest(date) < 0)
-						std::cout << "Error: not previous date." << std::endl;
-					else{
-						std::cout << date << " => " << value << " = " << (get_value_closest(date) * max) << std::endl;
-					}
-				}
-			}
-		}
-		file.close();
-	}
-	else
-		std::cerr << "Error: Can't open the file " << filename << std::endl;
+    return true;
+}
+
+bool BitcoinExchange::is_valid_amount(const std::string& value) {
+    for (int i = 1; value[i] != '\n' && value[i] != '\0'; ++i) {
+        if (!std::isdigit(value[i]) && value[i] != '.') {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void BitcoinExchange::compare(std::string filename){
+    std::ifstream file(filename.c_str());
+
+    if (file){
+        std::string line;
+        getline(file, line);
+        if (line != "date | value"){
+            std::cout << "Error: bad input => " << line << std::endl;
+            return;
+        }
+        while(getline(file, line)){
+            size_t sep = line.find("|");
+            if (sep == std::string::npos){
+                std::cout << "Error: bad input => " << line << std::endl;
+            }
+            else{
+                std::string date = line.substr(0, sep);
+                std::string value = line.substr(sep + 1);
+                if (date.empty() || value.empty()){
+                    std::cout << "Error: bad input => " << line << std::endl;
+                }
+                else if (!is_valid_date(date) || !is_valid_amount(value)) {
+                    std::cout << "Error: invalid format => " << line << std::endl;
+                }
+                else{
+                    float max = atof(value.c_str());
+                    if (max > 1000)
+                        std::cout << "Error: too large a number." << std::endl;
+                    else if(max < 0)
+                        std::cout << "Error: not a positive number." << std::endl;
+                    else if(get_value_closest(date) < 0)
+                        std::cout << "Error: not previous date." << std::endl;
+                    else{
+                        std::cout << date << " => " << value << " = " << (get_value_closest(date) * max) << std::endl;
+                    }
+                }
+            }
+        }
+        file.close();
+    }
+    else
+        std::cerr << "Error: Can't open the file " << filename << std::endl;
 }
